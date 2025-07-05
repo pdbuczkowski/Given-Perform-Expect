@@ -5,6 +5,7 @@ import org.junit.Test
 import org.junit.Assert.*
 import kotlin.reflect.KClass
 import kotlin.test.expect
+import kotlin.test.fail
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -51,9 +52,15 @@ class ExampleUnitTest {
                 changedState = InternalState()
                 myClass.changeState(changedState)
             },
-            validate = { result ->
-                result.expected = changedState
-                result.actual = myClass.itsState
+//            validate = { result ->
+//                result.expected = changedState
+//                result.actual = myClass.itsState
+//            }
+            validate = {
+                Result(
+                    actual = myClass.itsState,
+                    expected = changedState,
+                )
             }
         )
     }
@@ -65,34 +72,36 @@ class ExampleUnitTest {
         test(
             given = { classWithInt = ClassWithInt() },
             perform = {},
-            validate = { result->
-                result.actual = classWithInt.int
-                result.expected = null
-            },
+            validate = { Result(
+                actual = classWithInt.int,
+                expected = null,
+            ) },
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState() },
-            validate = { result ->
-                result.actual = classWithInt.int
-                result.expected = 0
-            },
+            validate = { Result(
+                actual = classWithInt.int,
+                expected = 0,
+            ) },
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState(7) },
-            validate = { result ->
-                result.actual = classWithInt.int
-                result.expected = 7
-            }
+            validate = { Result(
+                actual = classWithInt.int,
+                expected = 7,
+            ) }
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.signalException() },
-            validate = { it.wasException = MyException2::class },
+            validate = { Result(
+                wasException = MyException2::class
+            ) },
         )
     }
 }
@@ -125,23 +134,60 @@ fun <T> test(
 fun test(
     given: () -> Unit,
     perform: () -> Unit,
-    validate: (Result) -> Unit,
+    validate: () -> Result,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        val result = Result()
-        validate(result)
+        val result = validate()
         expect(result.expected, { result.actual })
     } catch (e: Exception) {
-        val result = Result()
-        validate(result)
+        val result = validate()
         expect(result.wasException, { e::class })
     } finally {
         release?.invoke()
     }
 }
+
+//fun testForResult(
+//    given: () -> Unit,
+//    perform: () -> Unit,
+//    validate: () -> Result,
+//    release: (() -> Unit)? = null,
+//) {
+//    given()
+//
+//    try {
+//        perform()
+//    } catch (e: Exception) {
+//        fail(e.toString())
+//    } finally {
+//        release?.invoke()
+//    }
+//
+//    val result = validate()
+//    expect(result.expected, { result.actual })
+//}
+//
+//fun testForException(
+//    given: () -> Unit,
+//    perform: () -> Unit,
+//    validate: () -> Result,
+//    release: (() -> Unit)? = null,
+//) {
+//    given()
+//
+//    try {
+//        perform()
+//        fail("Expected Exception was not observed: $")
+//    } catch (e: Exception) {
+//        val result = validate()
+//        expect(result.wasException, { e::class })
+//    } finally {
+//        release?.invoke()
+//    }
+//}
 
 class MyClass(
     var itsState: InternalState
