@@ -1,12 +1,10 @@
 package com.example.myapplication
 
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.reflect.KClass
+import piotr.buczkowski.testing.given_perform_expect.test
 import kotlin.test.expect
-import kotlin.test.fail
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -30,8 +28,8 @@ class ExampleUnitTest {
                 a = 9
                 b = 8
             },
-            perform = { a + b },
-            expectedResult = 17,
+            actual = { a + b },
+            expect = { 17 },
         )
 
         test(
@@ -40,7 +38,7 @@ class ExampleUnitTest {
                 b = 2
             },
             perform = { throw MyException1() },
-            expectedException = MyException1::class,
+            expect = { MyException1::class },
         )
 
         lateinit var myClass: MyClass
@@ -66,21 +64,21 @@ class ExampleUnitTest {
             given = { classWithInt = ClassWithInt() },
             perform = {},
             actual = { classWithInt.int },
-            expect = null,
+            expect = { null },
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState() },
             actual = { classWithInt.int },
-            expect = 0,
+            expect = { 0 },
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState(7) },
             actual = { classWithInt.int },
-            expect = 7,
+            expect = { 7 },
         )
 
         lateinit var internalState: InternalState
@@ -90,7 +88,7 @@ class ExampleUnitTest {
                 classWithInt = ClassWithInt(internalState)
             },
             perform = { classWithInt.signalException() },
-            expect = MyException2::class,
+            expect = { MyException2::class },
             called = { classWithInt.internalState.internalStateAction() }
         )
 
@@ -112,67 +110,6 @@ class ExampleUnitTest {
 
 private class MyException1: Exception()
 private class MyException2: Exception()
-
-fun test(
-    given: () -> Unit,
-    perform: () -> Unit,
-    expectedException: KClass<out Exception>
-) {
-    given()
-    try {
-        perform()
-    } catch (e: Exception) {
-        expect(expectedException, { e::class })
-    }
-}
-
-fun <T> test(
-    given: () -> Unit,
-    perform: () -> T,
-    expectedResult: T,
-) {
-    given()
-    expect(expectedResult, { perform() })
-}
-
-fun test(
-    given: () -> Unit,
-    perform: () -> Unit,
-    actual: (() -> Any?)? = null,
-    expect: Any? = null,
-    called: (() -> Any?)? = null,
-    release: (() -> Unit)? = null,
-) {
-    given()
-    try {
-        perform()
-        expect(expect, { actual?.invoke() })
-        called?.let { verify { it() } }
-    } catch (e: Exception) {
-        fail("Unexpected Exception.", e)
-    } finally {
-        release?.invoke()
-    }
-}
-
-fun test(
-    given: () -> Unit,
-    perform: () -> Unit,
-    expect: KClass<out Exception>,
-    called: (() -> Any?)? = null,
-    release: (() -> Unit)? = null,
-) {
-    given()
-    try {
-        perform()
-        fail("Expected Exception has not been observed: $expect")
-    } catch (e: Exception) {
-        expect(expect, { e::class })
-        called?.let { verify { it() } }
-    } finally {
-        release?.invoke()
-    }
-}
 
 class MyClass(
     var itsState: InternalState
