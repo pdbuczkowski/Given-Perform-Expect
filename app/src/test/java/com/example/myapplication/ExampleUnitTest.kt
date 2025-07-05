@@ -23,23 +23,13 @@ class ExampleUnitTest {
 
     @Test
     fun runTests() {
-//        test(
-//            given = {
-//                a = 9
-//                b = 2
-//            },
-//            on = { a + b },
-//            then = { it == 111 },
-//        )
-
-//        expect(4 , { 4 + 9 })
         test(
             given = {
                 a = 9
                 b = 8
             },
-            after = { a + b },
-            result = 17,
+            perform = { a + b },
+            expectedResult = 17,
         )
 
         test(
@@ -47,8 +37,8 @@ class ExampleUnitTest {
                 a = 5
                 b = 2
             },
-            after = { throw MyException1() },
-            exception = MyException1::class,
+            perform = { throw MyException1() },
+            expectedException = MyException1::class,
         )
 
         lateinit var myClass: MyClass
@@ -57,77 +47,84 @@ class ExampleUnitTest {
             given = {
                 myClass = MyClass(InternalState())
             },
-            after = {
+            perform = {
                 changedState = InternalState()
                 myClass.changeState(changedState)
             },
-            verify = { result ->
+            validate = { result ->
                 result.expected = changedState
                 result.actual = myClass.itsState
             }
         )
+    }
 
-//        class TestState {
-//            lateinit var myClass: MyClass
-//        }
-//        test(
-//            testState = TestState(),
-//            given = {
-//                myClass = MyClass(InternalState())
-//            },
-//            after = { myClass.changeState(InternalState()) },
-//            verify = { result ->
-//                result.expected = changedState
-//                result.actual = myClass.itsState
-//            }
-//        )
+    @Test
+    fun `testing ClassWithInt`() {
+        lateinit var classWithInt: ClassWithInt
+
+        test(
+            given = { classWithInt = ClassWithInt() },
+            perform = {},
+            validate = { result->
+                result.actual = classWithInt.int
+                result.expected = null
+            },
+        )
+
+        test(
+            given = { classWithInt = ClassWithInt() },
+            perform = { classWithInt.initState() },
+            validate = { result ->
+                result.actual = classWithInt.int
+                result.expected = 0
+            },
+        )
+
+        test(
+            given = { classWithInt = ClassWithInt() },
+            perform = { classWithInt.initState(7) },
+            validate = { result ->
+                result.actual = classWithInt.int
+                result.expected = 7
+            }
+        )
     }
 }
 
 private class MyException1: Exception()
 private class MyException2: Exception()
 
-//fun <T> test(
-//    given: () -> Unit,
-//    on: () -> T,
-//    then: (T) -> Boolean,
-//) {
-//    given()
-//    val result = on()
-//    expect(true, { then(result) })
-//}
-
 fun test(
     given: () -> Unit,
-    after: () -> Unit,
-    exception: KClass<out Exception>
+    perform: () -> Unit,
+    expectedException: KClass<out Exception>
 ) {
     given()
     try {
-        after()
+        perform()
     } catch (e: Exception) {
-        expect(exception, { e::class })
+        expect(expectedException, { e::class })
     }
 }
 
 fun <T> test(
     given: () -> Unit,
-    after: () -> T,
-    result: T,
+    perform: () -> T,
+    expectedResult: T,
 ) {
     given()
-    expect(result, { after() })
+    expect(expectedResult, { perform() })
 }
 
 fun <R> test(
     given: () -> Unit,
-    after: () -> Unit,
-    verify: (ActionResult<R>) -> Unit,
+    perform: () -> Unit,
+    validate: (Result<R>) -> Unit,
 ) {
     given()
-    after()
-    val result = ActionResult<R>()
-    verify(result)
+    perform()
+    val result = Result<R>()
+    validate(result)
     expect(result.expected, { result.actual })
 }
 
@@ -139,24 +136,17 @@ class MyClass(
 
 class InternalState
 
-class ActionResult<R> {
+class Result<R> {
     var expected: R? = null
     var actual: R? = null
 }
 
-//data class Actual<R>(
-//    var value: R? = null
-//)
+class ClassWithInt {
+    var int: Int? = null
 
-//fun <TestState, Result> test(
-//    testState: TestState,
-//    given: TestState.() -> Unit,
-//    after: TestState.() -> Unit,
-//    verify: TestState.(ActionResult<Result>) -> Unit,
-//) {
-//    given(testState)
-//    testState.after()
-//    val result = ActionResult<Result>()
-//    verify(testState, result)
-//    expect(result.expected, { result.actual} )
-//}
+    fun initState(value: Int = 0) { int = value }
+
+    fun signalException() {
+        throw MyException2()
+    }
+}
