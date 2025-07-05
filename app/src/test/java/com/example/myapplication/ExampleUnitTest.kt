@@ -44,7 +44,7 @@ class ExampleUnitTest {
 
         lateinit var myClass: MyClass
         lateinit var changedState: InternalState
-        expectResult(
+        test(
             given = {
                 myClass = MyClass(InternalState())
             },
@@ -52,9 +52,7 @@ class ExampleUnitTest {
                 changedState = InternalState()
                 myClass.changeState(changedState)
             },
-            expected = Expected(
-                value = changedState,
-            ),
+            expected = { changedState },
             actual = { myClass.itsState }
         )
     }
@@ -63,31 +61,31 @@ class ExampleUnitTest {
     fun `testing ClassWithInt`() {
         lateinit var classWithInt: ClassWithInt
 
-        expectResult(
+        test(
             given = { classWithInt = ClassWithInt() },
             perform = {},
-            expected = Expected(value = null),
+            expected = { null },
             actual = { classWithInt.int },
         )
 
-        expectResult(
+        test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState() },
-            expected = Expected(value = 0),
+            expected = { 0 },
             actual = { classWithInt.int }
         )
 
-        expectResult(
+        test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState(7) },
-            expected = Expected(value = 7),
+            expected = { 7 },
             actual = { classWithInt.int },
         )
 
-        expectException(
+        test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.signalException() },
-            expected = Expected(exception = MyException2::class),
+            expected = { MyException2::class },
         )
     }
 }
@@ -180,17 +178,19 @@ data class Expected(
     val exception: KClass<out Exception>? = null,
 )
 
-fun expectResult(
+fun test(
     given: () -> Unit,
     perform: () -> Unit,
     actual: () -> Any?,
-    expected: Expected,
+    expected: () -> Any?,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        expect(expected.value, actual)
+        with (expected()) {
+            expect(this, actual)
+        }
     } catch (e: Exception) {
         fail("Unexpected Exception.", e)
     } finally {
@@ -198,18 +198,18 @@ fun expectResult(
     }
 }
 
-fun expectException(
+fun test(
     given: () -> Unit,
     perform: () -> Unit,
-    expected: Expected,
+    expected: () -> KClass<out Exception>,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        fail("Expected Exception has not been observed: ${expected.exception}")
+        fail("Expected Exception has not been observed: ${expected()}")
     } catch (e: Exception) {
-        expect(expected.exception, { e::class })
+        expect(expected(), { e::class })
     } finally {
         release?.invoke()
     }
