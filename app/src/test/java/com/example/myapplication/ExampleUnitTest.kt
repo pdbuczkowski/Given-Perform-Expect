@@ -145,9 +145,7 @@ fun test(
     given()
     try {
         perform()
-        with (expect()) {
-            expect(this, actual)
-        }
+        expect(expect(), actual)
         expectWasCalled?.let { verify { it() } }
     } catch (e: Exception) {
         fail("Unexpected Exception.", e)
