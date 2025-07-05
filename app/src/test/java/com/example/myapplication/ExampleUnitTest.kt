@@ -126,6 +126,7 @@ fun test(
     given: () -> Unit,
     perform: () -> Unit,
     validate: (Result) -> Unit,
+    release: (() -> Unit)? = null,
 ) {
     given()
     try {
@@ -137,6 +138,8 @@ fun test(
         val result = Result()
         validate(result)
         expect(result.wasException, { e::class })
+    } finally {
+        release?.invoke()
     }
 }
 
