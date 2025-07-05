@@ -89,7 +89,7 @@ class ExampleUnitTest {
             }
         )
 
-        testException(
+        test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.signalException() },
             validate = { it.wasException = MyException2::class },
@@ -128,20 +128,11 @@ fun test(
     validate: (Result) -> Unit,
 ) {
     given()
-    perform()
-    val result = Result()
-    validate(result)
-    expect(result.expected, { result.actual })
-}
-
-fun testException(
-    given: () -> Unit,
-    perform: () -> Unit,
-    validate: (Result) -> Unit,
-) {
-    given()
     try {
         perform()
+        val result = Result()
+        validate(result)
+        expect(result.expected, { result.actual })
     } catch (e: Exception) {
         val result = Result()
         validate(result)
