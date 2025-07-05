@@ -1,10 +1,8 @@
 package com.example.myapplication
 
 import io.mockk.mockk
-import org.junit.Assert.assertEquals
 import org.junit.Test
 import piotr.buczkowski.testing.given_perform_expect.test
-import kotlin.test.expect
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,100 +10,93 @@ import kotlin.test.expect
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class ExampleUnitTest {
-    @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
-        expect(8, { 3 + 5 })
-    }
 
     var a = 0
     var b = 0
 
     @Test
-    fun runTests() {
-        test(
-            given = {
-                a = 9
-                b = 8
-            },
-            actual = { a + b },
-            expect = { 17 },
-        )
-
-        test(
-            given = {
-                a = 5
-                b = 2
-            },
-            perform = { throw MyException1() },
-            expect = { MyException1::class },
-        )
-
-        lateinit var myClass: MyClass
-        lateinit var changedState: InternalState
-        test(
-            given = {
-                myClass = MyClass(InternalState())
-            },
-            perform = {
-                changedState = InternalState()
-                myClass.changeState(changedState)
-            },
-            expect = { changedState },
-            actual = { myClass.itsState }
-        )
-    }
+    fun `check for expected result`() = test(
+        given = {
+            a = 9
+            b = 8
+        },
+        actual = { a + b },
+        expect = { 17 },
+    )
 
     @Test
-    fun `testing ClassWithInt`() {
-        lateinit var classWithInt: ClassWithInt
+    fun `checking for expected exception`() = test(
+        given = {},
+        perform = { throw MyException1() },
+        expect = { MyException1::class },
+    )
 
-        test(
-            given = { classWithInt = ClassWithInt() },
-            perform = {},
-            actual = { classWithInt.int },
-            expect = { null },
-        )
+    lateinit var myClass: MyClass
+    lateinit var changedState: InternalState
 
-        test(
-            given = { classWithInt = ClassWithInt() },
-            perform = { classWithInt.initState() },
-            actual = { classWithInt.int },
-            expect = { 0 },
-        )
+    @Test
+    fun `testing for expected result`() = test(
+        given = {
+            myClass = MyClass(InternalState())
+        },
+        perform = {
+            changedState = InternalState()
+            myClass.changeState(changedState)
+        },
+        expect = { changedState },
+        actual = { myClass.itsState },
+    )
 
-        test(
-            given = { classWithInt = ClassWithInt() },
-            perform = { classWithInt.initState(7) },
-            actual = { classWithInt.int },
-            expect = { 7 },
-        )
+    lateinit var classWithInt: ClassWithInt
+    @Test
+    fun `reading uninitialized 'null' state`() = test(
+        given = { classWithInt = ClassWithInt() },
+        perform = {},
+        actual = { classWithInt.int },
+        expect = { null },
+    )
 
-        lateinit var internalState: InternalState
-        test(
-            given = {
-                internalState = mockk(relaxed = true)
-                classWithInt = ClassWithInt(internalState)
-            },
-            perform = { classWithInt.signalException() },
-            expect = { MyException2::class },
-            called = { classWithInt.internalState.internalStateAction() }
-        )
+    @Test
+    fun `checking state after initialization`() = test(
+        given = { classWithInt = ClassWithInt() },
+        perform = { classWithInt.initState() },
+        actual = { classWithInt.int },
+        expect = { 0 },
+    )
 
-        lateinit var mockState: InternalState
-        lateinit var myClass: MyClass
-        test(
-            given = {
-                mockState = mockk(relaxed = true)
-                myClass = MyClass(mockState)
-            },
-            perform = { myClass.someAction() },
-            called = {
-                mockState.internalStateAction()
-                mockState.anotherAction()
-            },
-        )
-    }
+    @Test
+    fun `checking state after change`() = test(
+        given = { classWithInt = ClassWithInt() },
+        perform = { classWithInt.initState(7) },
+        actual = { classWithInt.int },
+        expect = { 7 },
+    )
+
+    lateinit var internalState: InternalState
+    @Test
+    fun `check for an exception and if a method was called during the test`() = test(
+        given = {
+            internalState = mockk(relaxed = true)
+            classWithInt = ClassWithInt(internalState)
+        },
+        perform = { classWithInt.signalException() },
+        expect = { MyException2::class },
+        called = { classWithInt.internalState.internalStateAction() }
+    )
+
+    lateinit var mockedState: InternalState
+    @Test
+    fun `check if some methods were called during the test`() = test(
+        given = {
+            mockedState = mockk(relaxed = true)
+            myClass = MyClass(mockedState)
+        },
+        perform = { myClass.someAction() },
+        called = {
+            mockedState.internalStateAction()
+            mockedState.anotherAction()
+        },
+    )
 }
 
 private class MyException1: Exception()
