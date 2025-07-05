@@ -114,69 +114,6 @@ fun <T> test(
     given()
     expect(expectedResult, { perform() })
 }
-//
-//fun test(
-//    given: () -> Unit,
-//    perform: () -> Unit,
-//    validate: () -> Result,
-//    release: (() -> Unit)? = null,
-//) {
-//    given()
-//    try {
-//        perform()
-//        val result = validate()
-//        expect(result.expected, { result.actual })
-//    } catch (e: Exception) {
-//        val result = validate()
-//        expect(result.wasException, { e::class })
-//    } finally {
-//        release?.invoke()
-//    }
-//}
-
-//fun testForResult(
-//    given: () -> Unit,
-//    perform: () -> Unit,
-//    validate: () -> Result,
-//    release: (() -> Unit)? = null,
-//) {
-//    given()
-//
-//    try {
-//        perform()
-//    } catch (e: Exception) {
-//        fail(e.toString())
-//    } finally {
-//        release?.invoke()
-//    }
-//
-//    val result = validate()
-//    expect(result.expected, { result.actual })
-//}
-//
-//fun testForException(
-//    given: () -> Unit,
-//    perform: () -> Unit,
-//    validate: () -> Result,
-//    release: (() -> Unit)? = null,
-//) {
-//    given()
-//
-//    try {
-//        perform()
-//        fail("Expected Exception was not observed: $")
-//    } catch (e: Exception) {
-//        val result = validate()
-//        expect(result.wasException, { e::class })
-//    } finally {
-//        release?.invoke()
-//    }
-//}
-
-data class Expected(
-    val value: Any? = null,
-    val exception: KClass<out Exception>? = null,
-)
 
 fun test(
     given: () -> Unit,
@@ -222,12 +159,6 @@ class MyClass(
 }
 
 class InternalState
-
-data class Result(
-    var expected: Any? = null,
-    var actual: Any? = null,
-    var wasException: KClass<out Exception>? = null,
-)
 
 class ClassWithInt {
     var int: Int? = null
