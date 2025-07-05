@@ -44,7 +44,7 @@ class ExampleUnitTest {
 
         lateinit var myClass: MyClass
         lateinit var changedState: InternalState
-        test(
+        expectResult(
             given = {
                 myClass = MyClass(InternalState())
             },
@@ -52,16 +52,10 @@ class ExampleUnitTest {
                 changedState = InternalState()
                 myClass.changeState(changedState)
             },
-//            validate = { result ->
-//                result.expected = changedState
-//                result.actual = myClass.itsState
-//            }
-            validate = {
-                Result(
-                    actual = myClass.itsState,
-                    expected = changedState,
-                )
-            }
+            expected = Expected(
+                value = changedState,
+            ),
+            actual = { myClass.itsState }
         )
     }
 
@@ -69,39 +63,31 @@ class ExampleUnitTest {
     fun `testing ClassWithInt`() {
         lateinit var classWithInt: ClassWithInt
 
-        test(
+        expectResult(
             given = { classWithInt = ClassWithInt() },
             perform = {},
-            validate = { Result(
-                actual = classWithInt.int,
-                expected = null,
-            ) },
+            expected = Expected(value = null),
+            actual = { classWithInt.int },
         )
 
-        test(
+        expectResult(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState() },
-            validate = { Result(
-                actual = classWithInt.int,
-                expected = 0,
-            ) },
+            expected = Expected(value = 0),
+            actual = { classWithInt.int }
         )
 
-        test(
+        expectResult(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState(7) },
-            validate = { Result(
-                actual = classWithInt.int,
-                expected = 7,
-            ) }
+            expected = Expected(value = 7),
+            actual = { classWithInt.int },
         )
 
-        test(
+        expectException(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.signalException() },
-            validate = { Result(
-                wasException = MyException2::class
-            ) },
+            expected = Expected(exception = MyException2::class),
         )
     }
 }
@@ -130,25 +116,25 @@ fun <T> test(
     given()
     expect(expectedResult, { perform() })
 }
-
-fun test(
-    given: () -> Unit,
-    perform: () -> Unit,
-    validate: () -> Result,
-    release: (() -> Unit)? = null,
-) {
-    given()
-    try {
-        perform()
-        val result = validate()
-        expect(result.expected, { result.actual })
-    } catch (e: Exception) {
-        val result = validate()
-        expect(result.wasException, { e::class })
-    } finally {
-        release?.invoke()
-    }
-}
+//
+//fun test(
+//    given: () -> Unit,
+//    perform: () -> Unit,
+//    validate: () -> Result,
+//    release: (() -> Unit)? = null,
+//) {
+//    given()
+//    try {
+//        perform()
+//        val result = validate()
+//        expect(result.expected, { result.actual })
+//    } catch (e: Exception) {
+//        val result = validate()
+//        expect(result.wasException, { e::class })
+//    } finally {
+//        release?.invoke()
+//    }
+//}
 
 //fun testForResult(
 //    given: () -> Unit,
@@ -188,6 +174,46 @@ fun test(
 //        release?.invoke()
 //    }
 //}
+
+data class Expected(
+    val value: Any? = null,
+    val exception: KClass<out Exception>? = null,
+)
+
+fun expectResult(
+    given: () -> Unit,
+    perform: () -> Unit,
+    actual: () -> Any?,
+    expected: Expected,
+    release: (() -> Unit)? = null,
+) {
+    given()
+    try {
+        perform()
+        expect(expected.value, actual)
+    } catch (e: Exception) {
+        fail("Unexpected Exception.", e)
+    } finally {
+        release?.invoke()
+    }
+}
+
+fun expectException(
+    given: () -> Unit,
+    perform: () -> Unit,
+    expected: Expected,
+    release: (() -> Unit)? = null,
+) {
+    given()
+    try {
+        perform()
+        fail("Expected Exception has not been observed: ${expected.exception}")
+    } catch (e: Exception) {
+        expect(expected.exception, { e::class })
+    } finally {
+        release?.invoke()
+    }
+}
 
 class MyClass(
     var itsState: InternalState
