@@ -88,6 +88,12 @@ class ExampleUnitTest {
                 result.expected = 7
             }
         )
+
+        testException(
+            given = { classWithInt = ClassWithInt() },
+            perform = { classWithInt.signalException() },
+            validate = { it.wasException = MyException2::class },
+        )
     }
 }
 
@@ -119,13 +125,28 @@ fun <T> test(
 fun <R> test(
     given: () -> Unit,
     perform: () -> Unit,
-    validate: (Result<R>) -> Unit,
+    validate: (ExpectedResult<R>) -> Unit,
 ) {
     given()
     perform()
-    val result = Result<R>()
+    val result = ExpectedResult<R>()
     validate(result)
     expect(result.expected, { result.actual })
+}
+
+fun testException(
+    given: () -> Unit,
+    perform: () -> Unit,
+    validate: (ExceptionResult) -> Unit,
+) {
+    given()
+    try {
+        perform()
+    } catch (e: Exception) {
+        val exceptionResult = ExceptionResult()
+        validate(exceptionResult)
+        expect(exceptionResult.wasException, { e::class })
+    }
 }
 
 class MyClass(
@@ -136,9 +157,13 @@ class MyClass(
 
 class InternalState
 
-class Result<R> {
+class ExpectedResult<R> {
     var expected: R? = null
     var actual: R? = null
+}
+
+class ExceptionResult {
+    var wasException: KClass<out Exception>? = null
 }
 
 class ClassWithInt {
