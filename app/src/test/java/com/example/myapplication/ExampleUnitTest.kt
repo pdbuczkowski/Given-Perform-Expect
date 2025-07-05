@@ -66,21 +66,21 @@ class ExampleUnitTest {
             given = { classWithInt = ClassWithInt() },
             perform = {},
             actual = { classWithInt.int },
-            expect = { null },
+            expect = null,
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState() },
             actual = { classWithInt.int },
-            expect = { 0 },
+            expect = 0,
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState(7) },
             actual = { classWithInt.int },
-            expect = { 7 },
+            expect = 7,
         )
 
         lateinit var internalState: InternalState
@@ -90,7 +90,7 @@ class ExampleUnitTest {
                 classWithInt = ClassWithInt(internalState)
             },
             perform = { classWithInt.signalException() },
-            expect = { MyException2::class },
+            expect = MyException2::class,
             called = { classWithInt.internalState.internalStateAction() }
         )
 
@@ -139,14 +139,14 @@ fun test(
     given: () -> Unit,
     perform: () -> Unit,
     actual: (() -> Any?)? = null,
-    expect: (() -> Any?)? = null,
+    expect: Any? = null,
     called: (() -> Any?)? = null,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        expect(expect?.invoke(), { actual?.invoke() })
+        expect(expect, { actual?.invoke() })
         called?.let { verify { it() } }
     } catch (e: Exception) {
         fail("Unexpected Exception.", e)
@@ -158,16 +158,16 @@ fun test(
 fun test(
     given: () -> Unit,
     perform: () -> Unit,
-    expect: () -> KClass<out Exception>,
+    expect: KClass<out Exception>,
     called: (() -> Any?)? = null,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        fail("Expected Exception has not been observed: ${expect()}")
+        fail("Expected Exception has not been observed: $expect")
     } catch (e: Exception) {
-        expect(expect(), { e::class })
+        expect(expect, { e::class })
         called?.let { verify { it() } }
     } finally {
         release?.invoke()
