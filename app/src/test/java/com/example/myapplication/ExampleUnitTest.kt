@@ -91,7 +91,7 @@ class ExampleUnitTest {
             },
             perform = { classWithInt.signalException() },
             expect = { MyException2::class },
-            expectWasCalled = { classWithInt.internalState.internalStateAction() }
+            called = { classWithInt.internalState.internalStateAction() }
         )
 
         lateinit var mockState: InternalState
@@ -102,9 +102,10 @@ class ExampleUnitTest {
                 myClass = MyClass(mockState)
             },
             perform = { myClass.someAction() },
-            expect = { null },
-            actual = { null },
-            expectWasCalled = { mockState.internalStateAction() },
+            called = {
+                mockState.internalStateAction()
+                mockState.anotherAction()
+            },
         )
     }
 }
@@ -137,16 +138,16 @@ fun <T> test(
 fun test(
     given: () -> Unit,
     perform: () -> Unit,
-    actual: () -> Any?,
-    expect: () -> Any?,
-    expectWasCalled: (() -> Any?)? = null,
+    actual: (() -> Any?)? = null,
+    expect: (() -> Any?)? = null,
+    called: (() -> Any?)? = null,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        expect(expect(), actual)
-        expectWasCalled?.let { verify { it() } }
+        expect(expect?.invoke(), { actual?.invoke() })
+        called?.let { verify { it() } }
     } catch (e: Exception) {
         fail("Unexpected Exception.", e)
     } finally {
@@ -158,7 +159,7 @@ fun test(
     given: () -> Unit,
     perform: () -> Unit,
     expect: () -> KClass<out Exception>,
-    expectWasCalled: (() -> Any?)? = null,
+    called: (() -> Any?)? = null,
     release: (() -> Unit)? = null,
 ) {
     given()
@@ -167,7 +168,7 @@ fun test(
         fail("Expected Exception has not been observed: ${expect()}")
     } catch (e: Exception) {
         expect(expect(), { e::class })
-        expectWasCalled?.let { verify { it() } }
+        called?.let { verify { it() } }
     } finally {
         release?.invoke()
     }
@@ -179,11 +180,13 @@ class MyClass(
     fun changeState(anotherState: InternalState) { itsState = anotherState }
     fun someAction() {
         itsState.internalStateAction()
+        itsState.anotherAction()
     }
 }
 
 class InternalState {
     fun internalStateAction() {}
+    fun anotherAction() {}
 }
 
 class ClassWithInt(val internalState: InternalState = InternalState()) {
