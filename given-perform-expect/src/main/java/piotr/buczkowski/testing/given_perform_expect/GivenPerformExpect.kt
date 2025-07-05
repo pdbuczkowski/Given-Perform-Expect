@@ -1,3 +1,5 @@
+// Copyright (c) 2025 Piotr Buczkowski – Licensed under the MIT License
+
 package piotr.buczkowski.testing.given_perform_expect
 
 import io.mockk.verify
