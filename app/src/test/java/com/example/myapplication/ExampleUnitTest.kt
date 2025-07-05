@@ -1,8 +1,9 @@
 package com.example.myapplication
 
+import io.mockk.mockk
+import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 import kotlin.reflect.KClass
 import kotlin.test.expect
 import kotlin.test.fail
@@ -82,10 +83,28 @@ class ExampleUnitTest {
             expect = { 7 },
         )
 
+        lateinit var internalState: InternalState
         test(
-            given = { classWithInt = ClassWithInt() },
+            given = {
+                internalState = mockk(relaxed = true)
+                classWithInt = ClassWithInt(internalState)
+            },
             perform = { classWithInt.signalException() },
             expect = { MyException2::class },
+            expectWasCalled = { classWithInt.internalState.internalStateAction() }
+        )
+
+        lateinit var mockState: InternalState
+        lateinit var myClass: MyClass
+        test(
+            given = {
+                mockState = mockk(relaxed = true)
+                myClass = MyClass(mockState)
+            },
+            perform = { myClass.someAction() },
+            expect = { null },
+            actual = { null },
+            expectWasCalled = { mockState.internalStateAction() },
         )
     }
 }
@@ -120,6 +139,7 @@ fun test(
     perform: () -> Unit,
     actual: () -> Any?,
     expect: () -> Any?,
+    expectWasCalled: (() -> Any?)? = null,
     release: (() -> Unit)? = null,
 ) {
     given()
@@ -128,6 +148,7 @@ fun test(
         with (expect()) {
             expect(this, actual)
         }
+        expectWasCalled?.let { verify { it() } }
     } catch (e: Exception) {
         fail("Unexpected Exception.", e)
     } finally {
@@ -139,6 +160,7 @@ fun test(
     given: () -> Unit,
     perform: () -> Unit,
     expect: () -> KClass<out Exception>,
+    expectWasCalled: (() -> Any?)? = null,
     release: (() -> Unit)? = null,
 ) {
     given()
@@ -147,23 +169,7 @@ fun test(
         fail("Expected Exception has not been observed: ${expect()}")
     } catch (e: Exception) {
         expect(expect(), { e::class })
-    } finally {
-        release?.invoke()
-    }
-}
-
-fun test(
-    given: () -> Unit,
-    perform: () -> Unit,
-    validate: () -> Unit,
-    release: (() -> Unit)? = null,
-) {
-    given()
-    try {
-        perform()
-        validate()
-    } catch (e: Exception) {
-        fail("Unexpected Exception.", e)
+        expectWasCalled?.let { verify { it() } }
     } finally {
         release?.invoke()
     }
@@ -173,16 +179,22 @@ class MyClass(
     var itsState: InternalState
 ) {
     fun changeState(anotherState: InternalState) { itsState = anotherState }
+    fun someAction() {
+        itsState.internalStateAction()
+    }
 }
 
-class InternalState
+class InternalState {
+    fun internalStateAction() {}
+}
 
-class ClassWithInt {
+class ClassWithInt(val internalState: InternalState = InternalState()) {
     var int: Int? = null
 
     fun initState(value: Int = 0) { int = value }
 
     fun signalException() {
+        internalState.internalStateAction()
         throw MyException2()
     }
 }
