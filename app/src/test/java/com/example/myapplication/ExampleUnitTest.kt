@@ -52,7 +52,7 @@ class ExampleUnitTest {
                 changedState = InternalState()
                 myClass.changeState(changedState)
             },
-            expected = { changedState },
+            expect = { changedState },
             actual = { myClass.itsState }
         )
     }
@@ -64,28 +64,28 @@ class ExampleUnitTest {
         test(
             given = { classWithInt = ClassWithInt() },
             perform = {},
-            expected = { null },
             actual = { classWithInt.int },
+            expect = { null },
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState() },
-            expected = { 0 },
-            actual = { classWithInt.int }
+            actual = { classWithInt.int },
+            expect = { 0 },
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.initState(7) },
-            expected = { 7 },
             actual = { classWithInt.int },
+            expect = { 7 },
         )
 
         test(
             given = { classWithInt = ClassWithInt() },
             perform = { classWithInt.signalException() },
-            expected = { MyException2::class },
+            expect = { MyException2::class },
         )
     }
 }
@@ -119,13 +119,13 @@ fun test(
     given: () -> Unit,
     perform: () -> Unit,
     actual: () -> Any?,
-    expected: () -> Any?,
+    expect: () -> Any?,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        with (expected()) {
+        with (expect()) {
             expect(this, actual)
         }
     } catch (e: Exception) {
@@ -138,15 +138,15 @@ fun test(
 fun test(
     given: () -> Unit,
     perform: () -> Unit,
-    expected: () -> KClass<out Exception>,
+    expect: () -> KClass<out Exception>,
     release: (() -> Unit)? = null,
 ) {
     given()
     try {
         perform()
-        fail("Expected Exception has not been observed: ${expected()}")
+        fail("Expected Exception has not been observed: ${expect()}")
     } catch (e: Exception) {
-        expect(expected(), { e::class })
+        expect(expect(), { e::class })
     } finally {
         release?.invoke()
     }
