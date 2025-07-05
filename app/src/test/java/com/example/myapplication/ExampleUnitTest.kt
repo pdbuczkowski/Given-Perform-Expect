@@ -152,6 +152,23 @@ fun test(
     }
 }
 
+fun test(
+    given: () -> Unit,
+    perform: () -> Unit,
+    validate: () -> Unit,
+    release: (() -> Unit)? = null,
+) {
+    given()
+    try {
+        perform()
+        validate()
+    } catch (e: Exception) {
+        fail("Unexpected Exception.", e)
+    } finally {
+        release?.invoke()
+    }
+}
+
 class MyClass(
     var itsState: InternalState
 ) {
