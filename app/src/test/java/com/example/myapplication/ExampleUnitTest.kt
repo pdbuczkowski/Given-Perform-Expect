@@ -122,14 +122,14 @@ fun <T> test(
     expect(expectedResult, { perform() })
 }
 
-fun <R> test(
+fun test(
     given: () -> Unit,
     perform: () -> Unit,
-    validate: (ExpectedResult<R>) -> Unit,
+    validate: (Result) -> Unit,
 ) {
     given()
     perform()
-    val result = ExpectedResult<R>()
+    val result = Result()
     validate(result)
     expect(result.expected, { result.actual })
 }
@@ -137,15 +137,15 @@ fun <R> test(
 fun testException(
     given: () -> Unit,
     perform: () -> Unit,
-    validate: (ExceptionResult) -> Unit,
+    validate: (Result) -> Unit,
 ) {
     given()
     try {
         perform()
     } catch (e: Exception) {
-        val exceptionResult = ExceptionResult()
-        validate(exceptionResult)
-        expect(exceptionResult.wasException, { e::class })
+        val result = Result()
+        validate(result)
+        expect(result.wasException, { e::class })
     }
 }
 
@@ -157,14 +157,11 @@ class MyClass(
 
 class InternalState
 
-class ExpectedResult<R> {
-    var expected: R? = null
-    var actual: R? = null
-}
-
-class ExceptionResult {
-    var wasException: KClass<out Exception>? = null
-}
+data class Result(
+    var expected: Any? = null,
+    var actual: Any? = null,
+    var wasException: KClass<out Exception>? = null,
+)
 
 class ClassWithInt {
     var int: Int? = null
