@@ -3,17 +3,18 @@
 package piotr.buczkowski.testing.given_perform_expect
 
 import io.mockk.coVerify
+import kotlinx.coroutines.test.runTest
 import kotlin.test.expect
 import kotlin.test.fail
 
-suspend fun coTest(
+fun coTest(
     given: () -> Unit,
     perform: (suspend () -> Unit)? = null,
     actual: (suspend () -> Any?)? = null,
     expect: (() -> Any?)? = null,
     called: (suspend () -> Any?)? = null,
     release: (() -> Unit)? = null,
-) {
+) = runTest {
     given()
     try {
         perform?.invoke()

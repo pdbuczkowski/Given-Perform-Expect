@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.kotlin.test)
     implementation(libs.mockk)
     implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.coroutines.test)
 }
 publishing {
     publications {
