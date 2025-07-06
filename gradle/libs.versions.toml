@@ -1,6 +1,6 @@
 [versions]
 agp = "8.11.0"
-givenPerformExpect = "1.0.0"
+givenPerformExpect = "0.0.2"
 kotlin = "2.2.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -16,10 +16,12 @@ navigationUiKtx = "2.6.0"
 kotlinTest = "2.2.0"
 mockk = "1.14.4"
 jetbrainsKotlinJvm = "2.2.0"
+kotlinxCoroutines = "0.19.2"
+kotlinxCoroutinesTest = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-given-perform-expect = { module = "com.github.pdbuczkowski:Given-Perform-Expect", version.ref = "givenPerformExpect" }
+pdbuczkowski-testing = { group = "piotr.buczkowski.testing", name = "given-perform-expect", version.ref = "givenPerformExpect" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -32,9 +34,10 @@ androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navi
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlinTest" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
-

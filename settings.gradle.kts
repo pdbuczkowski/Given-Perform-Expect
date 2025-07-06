@@ -16,10 +16,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") }
+//        maven { url = uri("https://jitpack.io") }
+        mavenLocal()
     }
 }
 
-rootProject.name = "My Application"
+rootProject.name = "Given-Perform-Expect"
 include(":app")
 include(":given-perform-expect")
