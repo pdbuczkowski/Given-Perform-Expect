@@ -4,7 +4,7 @@ package com.example.myapplication
 
 import io.mockk.mockk
 import org.junit.Test
-import piotr.buczkowski.testing.given_perform_expect.test
+import piotr.buczkowski.testing.given_perform_expect.coTest
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -17,7 +17,7 @@ class SampleTest {
     var b = 0
 
     @Test
-    fun `check for expected result`() = test(
+    fun `check for expected result`() = coTest(
         given = {
             a = 9
             b = 8
@@ -27,7 +27,7 @@ class SampleTest {
     )
 
     @Test
-    fun `checking for expected exception`() = test(
+    fun `checking for expected exception`() = coTest(
         given = {},
         perform = { throw MyException1() },
         expect = { MyException1::class },
@@ -37,7 +37,7 @@ class SampleTest {
     lateinit var changedState: InternalState
 
     @Test
-    fun `testing for expected result`() = test(
+    fun `testing for expected result`() = coTest(
         given = {
             myClass = MyClass(InternalState())
         },
@@ -51,7 +51,7 @@ class SampleTest {
 
     lateinit var classWithInt: ClassWithInt
     @Test
-    fun `reading uninitialized 'null' state`() = test(
+    fun `reading uninitialized 'null' state`() = coTest(
         given = { classWithInt = ClassWithInt() },
         perform = {},
         actual = { classWithInt.int },
@@ -59,7 +59,7 @@ class SampleTest {
     )
 
     @Test
-    fun `checking state after initialization`() = test(
+    fun `checking state after initialization`() = coTest(
         given = { classWithInt = ClassWithInt() },
         perform = { classWithInt.initState() },
         actual = { classWithInt.int },
@@ -67,7 +67,7 @@ class SampleTest {
     )
 
     @Test
-    fun `checking state after change`() = test(
+    fun `checking state after change`() = coTest(
         given = { classWithInt = ClassWithInt() },
         perform = { classWithInt.initState(7) },
         actual = { classWithInt.int },
@@ -76,7 +76,7 @@ class SampleTest {
 
     lateinit var internalState: InternalState
     @Test
-    fun `check for an exception and if a method was called during the test`() = test(
+    fun `check for an exception and if a method was called during the test`() = coTest(
         given = {
             internalState = mockk(relaxed = true)
             classWithInt = ClassWithInt(internalState)
@@ -88,7 +88,7 @@ class SampleTest {
 
     lateinit var mockedState: InternalState
     @Test
-    fun `check if some methods were called during the test`() = test(
+    fun `check if some methods were called during the test`() = coTest(
         given = {
             mockedState = mockk(relaxed = true)
             myClass = MyClass(mockedState)
