@@ -7,7 +7,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.expect
 import kotlin.test.fail
 
-fun coTest(
+fun test(
     given: () -> Unit,
     perform: (suspend () -> Unit)? = null,
     actual: (suspend () -> Any?)? = null,

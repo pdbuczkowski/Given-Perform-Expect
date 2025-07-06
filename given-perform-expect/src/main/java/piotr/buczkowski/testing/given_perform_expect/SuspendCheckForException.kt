@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 import kotlin.test.expect
 import kotlin.test.fail
 
-fun coTest(
+fun test(
     given: () -> Unit,
     perform: suspend () -> Unit,
     expect: () -> KClass<out Exception>,

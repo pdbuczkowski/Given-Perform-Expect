@@ -4,7 +4,7 @@ package com.example.myapplication
 
 import io.mockk.mockk
 import org.junit.Test
-import piotr.buczkowski.testing.given_perform_expect.coTest
+import piotr.buczkowski.testing.given_perform_expect.test
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -17,7 +17,7 @@ class SampleSuspendTest {
     lateinit var changedState: InternalStateSuspend
 
     @Test
-    fun `testing for expected result`() = coTest(
+    fun `testing for expected result`() = test(
         given = {
             myClass = MyClassSuspend(InternalStateSuspend())
         },
@@ -31,7 +31,7 @@ class SampleSuspendTest {
 
     lateinit var classWithInt: ClassWithIntSuspend
     @Test
-    fun `reading uninitialized 'null' state`() = coTest(
+    fun `reading uninitialized 'null' state`() = test(
         given = { classWithInt = ClassWithIntSuspend() },
         perform = {},
         actual = { classWithInt.readValue() },
@@ -39,7 +39,7 @@ class SampleSuspendTest {
     )
 
     @Test
-    fun `checking state after initialization`() = coTest(
+    fun `checking state after initialization`() = test(
         given = { classWithInt = ClassWithIntSuspend() },
         perform = { classWithInt.initState() },
         actual = { classWithInt.readValue() },
@@ -47,7 +47,7 @@ class SampleSuspendTest {
     )
 
     @Test
-    fun `checking state after change`() = coTest(
+    fun `checking state after change`() = test(
         given = { classWithInt = ClassWithIntSuspend() },
         perform = { classWithInt.initState(7) },
         actual = { classWithInt.readValue() },
@@ -56,7 +56,7 @@ class SampleSuspendTest {
 
     lateinit var internalState: InternalStateSuspend
     @Test
-    fun `check for an exception and if a method was called during the test`() = coTest(
+    fun `check for an exception and if a method was called during the test`() = test(
         given = {
             internalState = mockk(relaxed = true)
             classWithInt = ClassWithIntSuspend(internalState)
@@ -68,7 +68,7 @@ class SampleSuspendTest {
 
     lateinit var mockedState: InternalStateSuspend
     @Test
-    fun `check if some methods were called during the test`() = coTest(
+    fun `check if some methods were called during the test`() = test(
         given = {
             mockedState = mockk(relaxed = true)
             myClass = MyClassSuspend(mockedState)
