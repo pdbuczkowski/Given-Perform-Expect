@@ -1,3 +1,5 @@
+// Copyright (c) 2025 Piotr Buczkowski – Licensed under the MIT License
+
 package com.example.myapplication
 
 class MyException1: Exception()

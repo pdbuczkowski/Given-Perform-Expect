@@ -11,7 +11,7 @@ import piotr.buczkowski.testing.given_perform_expect.test
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class ExampleUnitTest {
+class SampleTest {
 
     var a = 0
     var b = 0
